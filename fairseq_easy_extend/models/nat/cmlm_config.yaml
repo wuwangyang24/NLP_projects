@@ -1,12 +1,12 @@
 # @package _group_
 task:
   _name: translation_lev
-  data: ??? # path to data directory
+  data: /content/drive/MyDrive/NLP2-2023-ET/iwslt14.tokenized.de-en 
   source_lang: de
   target_lang: en
   noise: random_mask
 criterion:
-  _name: nat_loss
+  _name: rl_criterion
 model:
   _name: cmlm_transformer_base
   share_decoder_input_output_embed: true
