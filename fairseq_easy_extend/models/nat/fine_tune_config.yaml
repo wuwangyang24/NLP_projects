@@ -6,7 +6,7 @@ task:
   target_lang: en
   noise: random_mask
 criterion:
-  _name: rl_criterion
+  _name: rl_loss
 model:
   _name: cmlm_transformer_base
   dropout: 0.2
