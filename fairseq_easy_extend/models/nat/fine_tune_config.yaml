@@ -9,7 +9,6 @@ criterion:
   _name: rl_criterion
 model:
   _name: cmlm_transformer_base
-  share_decoder_input_output_embed: true
   dropout: 0.2
   label_smoothing: 0.1
   length_loss_factor: 0.01
@@ -26,11 +25,11 @@ dataset:
 optimization:
   lr: [0.0005]
   update_freq: [8]
-  max_update: 20000
+  max_update: 20
   stop_min_lr: 1e-09
 checkpoint:
   no_epoch_checkpoints: true
 common:
   log_format: simple
-  log_interval: 100
+  log_interval: 20
 
