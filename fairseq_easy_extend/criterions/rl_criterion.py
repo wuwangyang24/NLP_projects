@@ -125,7 +125,7 @@ class RLCriterion(FairseqCriterion):
       outputs_softmax,outputs_argmax = self.sampling(outputs)
       sampled_sentences = [self.tgt_dict.string(sentence) for sentence in outputs_argmax]
       print(sampled_sentences[0])
-      repetition_ratio = sum([len(set(sentence.split()))-len(sentence.split()) for sentence in sampled_sentences])/sum([len(sentence) for sentence in sampled_sentences])
+      repetition_ratio = sum([len(sentence.split())-len(set(sentence.split())) for sentence in sampled_sentences])/sum([len(sentence) for sentence in sampled_sentences])
       return repetition_ratio
 
     @staticmethod
