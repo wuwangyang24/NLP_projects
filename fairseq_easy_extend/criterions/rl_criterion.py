@@ -111,7 +111,7 @@ class RLCriterion(FairseqCriterion):
       )
       nsentences = samples['nsentences']
       ntokens = samples['ntokens']
-      sample_size = nsentences*samples['net_input']['src_lengths'][0]
+      sample_size = 1
       outputs_logging = {
                          'loss': loss,
                          'nsentences':nsentences, 
