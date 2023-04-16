@@ -106,7 +106,7 @@ class RLCriterion(FairseqCriterion):
       loss = self._compute_loss(outputs['word_ins']['out'], 
                                 targets, 
                                 # masks=outputs['word_ins']['mask'],
-                                label_smoothing=outputs['word_ins']['ls'],
+                                # label_smoothing=outputs['word_ins']['ls'],
                                 # factor=outputs['length']['factor']
       )
       nsentences = samples['nsentences']
