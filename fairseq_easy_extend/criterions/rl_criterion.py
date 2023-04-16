@@ -73,7 +73,7 @@ class RLCriterion(FairseqCriterion):
       with torch.no_grad():
         if self.metric == "CHRF":
           chrf = CHRFScore()
-          eps = 0.01
+          eps = 0.001
           R = torch.tensor([chrf(pred, target) for pred, target in zip(preds, targets)])
           R = 1/(R+eps)
         elif self.metric == "COMET":
