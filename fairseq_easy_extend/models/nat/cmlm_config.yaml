@@ -31,7 +31,7 @@ dataset:
 optimization:
   lr: [0.0005]
   update_freq: [8]
-  max_update: 10000
+  max_update: 1
   stop_min_lr: 1e-09
 checkpoint:
   no_epoch_checkpoints: false
