@@ -26,6 +26,7 @@ class RLCriterion(FairseqCriterion):
         super().__init__(task)
         self.metric = sentence_level_metric
         self.tgt_dict = task.target_dictionary
+        print(f"metric: {self.metric}")
 
     def _compute_loss(
         self, outputs, targets, masks=None, label_smoothing=0.0, name="loss", factor=1.0
