@@ -127,9 +127,8 @@ class RLCriterion(FairseqCriterion):
     def compute_repetition(self, outputs):
       outputs_softmax,outputs_argmax = self.sampling(outputs)
       sampled_sentences = [self.tgt_dict.string(sentence) for sentence in outputs_argmax]
-#       print(sampled_sentences[0])
-      repetition_ratio = sum([len(sentence.split())-len(set(sentence.split())) for sentence in sampled_sentences])/sum([len(sentence) for sentence in sampled_sentences])
-      return repetition_ratio
+      repetition_sum = sum([len(sentence.split())-len(set(sentence.split())) for sentence in sampled_sentences])
+      return repetition_sum
 
     @staticmethod
     def reduce_metrics(logging_outputs: List[Dict[str, Any]]) -> None:  
@@ -138,13 +137,10 @@ class RLCriterion(FairseqCriterion):
         nsentences = sum(log.get("nsentences", 0) for log in logging_outputs)
         ntokens = sum(log.get("ntokens", 0) for log in logging_outputs)
         sample_size = sum(log.get("sample_size", 0) for log in logging_outputs)
-        repetition_ratio_sum = sum(log.get("repetition_ratio", 0) for log in logging_outputs)
+        repetition_sum = sum(log.get("repetition_sum", 0) for log in logging_outputs)
         
         print(f"loss: {loss_sum/len(logging_outputs)}")
-        print(f"repetition_ratio: {repetition_ratio_sum/len(logging_outputs)}")
-        metrics.log_scalar(
-            "loss", loss_sum/len(logging_outputs)
-        )
-
-        metrics.log_scalar('repetition_ratio', repetition_ratio_sum/len(logging_outputs))
+        print(f"repetition_mean: {repetition_sum/len(logging_outputs)}")
+        metrics.log_scalar("loss", loss_sum/len(logging_outputs))
+        metrics.log_scalar('repetition_mean', repetition_sum/len(logging_outputs))
 
