@@ -8,8 +8,7 @@ from fairseq.logging import metrics
 from fairseq.criterions import FairseqCriterion, register_criterion
 from fairseq.dataclass import FairseqDataclass
 from torch import Tensor
-import nltk
-from torchmetrics import CHRFScore
+from sacrebleu.metrics import BLEU, CHRF, TER
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List
@@ -75,10 +74,10 @@ class RLCriterion(FairseqCriterion):
     def compute_reward(self, sentence_level_metric, preds, targets):
       with torch.no_grad():
         if self.metric == "CHRF":
-          chrf = CHRFScore()
-          eps = 0.001
-          R = torch.tensor([chrf(pred, target) for pred, target in zip(preds, targets)])
-          R = 1/(R+eps)
+          chrf = CHRF()
+          eps = 1
+          R = torch.tensor([chrf.corpus_score(pred, target) for pred, target in zip(preds, targets)])
+          R = 100/(R+eps)
         elif self.metric == "COMET":
           ter = TER()
           R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
