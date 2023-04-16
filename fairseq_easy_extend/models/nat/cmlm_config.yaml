@@ -38,3 +38,4 @@ checkpoint:
 common:
   log_format: simple
   log_interval: 100
+  tensorboard_logdir: /content/drive/MyDrive/NLP_project_1
