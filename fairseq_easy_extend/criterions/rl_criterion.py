@@ -120,7 +120,7 @@ class RLCriterion(FairseqCriterion):
                          'nsentences':nsentences, 
                          'ntokens': ntokens,
                          'sample_size': sample_size,
-                         'repetition_ratio': self.compute_repetition(outputs['word_ins']['out'])
+                         'repetition_sum': self.compute_repetition(outputs['word_ins']['out'])
                          }
       return loss, sample_size, outputs_logging
 
@@ -139,8 +139,8 @@ class RLCriterion(FairseqCriterion):
         sample_size = sum(log.get("sample_size", 0) for log in logging_outputs)
         repetition_sum = sum(log.get("repetition_sum", 0) for log in logging_outputs)
         
-        print(f"loss: {loss_sum/len(logging_outputs)}")
-        print(f"repetition_mean: {repetition_sum/len(logging_outputs)}")
-        metrics.log_scalar("loss", loss_sum/len(logging_outputs))
-        metrics.log_scalar('repetition_mean', repetition_sum/len(logging_outputs))
+        print(f"loss: {loss_sum}")
+        print(f"repetition_sum: {repetition_sum}")
+        metrics.log_scalar("loss", loss_sum)
+        metrics.log_scalar('repetition_sum', repetition_sum)
 
