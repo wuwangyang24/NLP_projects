@@ -9,8 +9,7 @@ from fairseq.criterions import FairseqCriterion, register_criterion
 from fairseq.dataclass import FairseqDataclass
 from torch import Tensor
 import nltk
-from sacrebleu.metrics import BLEU
-from sacrebleu.metrics import TER
+from sacrebleu.metrics import CHRF
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List
@@ -71,11 +70,11 @@ class RLCriterion(FairseqCriterion):
     ## Calculate reward
     def compute_reward(self, sentence_level_metric, preds, targets):
       with torch.no_grad():
-        if self.metric == "BLEU":
-          bleu = BLEU()
-          R = torch.tensor([bleu.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
+        if self.metric == "CHRF":
+          chrf = CHRF()
+          R = torch.tensor([chrf.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
           R = 100/(R+1)
-        elif self.metric == "TER":
+        elif self.metric == "COMET":
           ter = TER()
           R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
       return R
