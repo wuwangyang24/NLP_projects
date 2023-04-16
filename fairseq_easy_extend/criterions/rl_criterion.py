@@ -51,6 +51,8 @@ class RLCriterion(FairseqCriterion):
         sampled_sentences = [self.tgt_dict.string(sentence) for sentence in outputs_argmax]
         targets = [self.tgt_dict.string(sentence) for sentence in targets]
         targets = [[sentence] for sentence in targets]
+        print(sampled_sentences[0])
+        print(targets[0])
         #compute loss
         R = self.compute_reward(self.metric, sampled_sentences, targets)
         R = R.to(outputs_softmax.device)
