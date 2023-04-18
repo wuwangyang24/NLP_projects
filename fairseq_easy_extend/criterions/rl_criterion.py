@@ -42,16 +42,12 @@ class RLCriterion(FairseqCriterion):
         
         outputs_softmax,outputs_argmax = self.sampling(outputs)
         #convert to string sentence
-
-#         sampled_sentences = [self.tgt_dict.string(sentence) if sentence.numel()>0 else "" for sentence in outputs_argmax]
-#         targets = [self.tgt_dict.string(sentence) if sentence.numel()>0 else "" for sentence in targets]
-#         targets = [[sentence.replace('<pad>','').strip()] for sentence in targets]
         sampled_sentence = self.tgt_dict.string(outputs_argmax)
         targets = self.tgt_dict.string(targets)
         print(f"sampled sentence: {sampled_sentence}")
         print(f"target sentence: {targets}")
         #compute loss
-        R = self.compute_reward(self.metric, sampled_sentences, targets)
+        R = self.compute_reward(self.metric, sampled_sentence, [targets])
         R = R.to(outputs_softmax.device)
         loss = torch.mul(-self.log_prob(outputs_softmax),R)
 
@@ -83,7 +79,6 @@ class RLCriterion(FairseqCriterion):
 
     ## Compute the log probability of outputs 
     def log_prob(self, outputs):
-      outputs_prob = torch.max(outputs,dim=-1)
       log_prob = torch.log(outputs_prob.values)
       log_prob = torch.sum(log_prob, dim=-1)
       return log_prob
@@ -95,7 +90,7 @@ class RLCriterion(FairseqCriterion):
       outputs_softmax = soft_max(outputs)
       #argmax over softmax 
       outputs_argmax = torch.argmax(outputs_softmax,dim=-1)
-      return outputs_softmax,outputs_argmax
+      return outputs_softmax.max(dim=-1),outputs_argmax
 
 
     def forward(self, model, samples, reduce=True):
