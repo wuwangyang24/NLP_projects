@@ -117,7 +117,7 @@ class RLCriterion(FairseqCriterion):
                          'nsentences':nsentences, 
                          'ntokens': ntokens,
                          'sample_size': sample_size,
-                         'repetition_sum': self.compute_repetition(outputs['word_ins']['out'])
+                         'repetition': self.compute_repetition(outputs['word_ins']['out'])/nsentences
                          }
       return loss, sample_size, outputs_logging
 
