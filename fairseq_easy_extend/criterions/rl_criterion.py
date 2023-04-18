@@ -113,7 +113,7 @@ class RLCriterion(FairseqCriterion):
       ntokens = samples['ntokens']
       sample_size = 1
       outputs_logging = {
-                         'loss': loss,
+                         'loss': loss.detach(),
                          'nsentences':nsentences, 
                          'ntokens': ntokens,
                          'sample_size': sample_size,
