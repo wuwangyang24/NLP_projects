@@ -105,6 +105,7 @@ class RLCriterion(FairseqCriterion):
                       samples['net_input']['src_lengths'], 
                       samples['prev_target'], 
                       samples['target'])
+      print(outputs)
       targets = samples['target']
       loss = self._compute_loss(outputs['word_ins']['out'], 
                                 targets, 
