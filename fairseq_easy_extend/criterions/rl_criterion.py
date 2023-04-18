@@ -42,6 +42,7 @@ class RLCriterion(FairseqCriterion):
             outputs, targets = outputs[masks], targets[masks]
         
         print(outputs)
+        print(targets)
         outputs_softmax,outputs_argmax = self.sampling(outputs)
         #convert to string sentence
         print(outputs_argmax)
