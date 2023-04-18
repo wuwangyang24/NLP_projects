@@ -1,4 +1,3 @@
-
 import math
 
 import torch
@@ -47,8 +46,10 @@ class RLCriterion(FairseqCriterion):
         print(f"sampled sentence: {sampled_sentence}")
         print(f"target sentence: {targets}")
         #compute loss
-        R = self.compute_reward(self.metric, sampled_sentence, [targets])
-        R = R.to(outputs_softmax.device)
+        R = self.compute_reward(sampled_sentence, [targets])
+        # R = R.to(outputs_softmax.device)
+        print(f"R:{R}")
+        print(f"log:{-self.log_prob(outputs_softmax)}")
         loss = torch.mul(-self.log_prob(outputs_softmax),R)
 
         #argmax over the softmax \ sampling (e.g. multinomial)
@@ -65,12 +66,12 @@ class RLCriterion(FairseqCriterion):
         return loss
 
     ## Calculate reward
-    def compute_reward(self, sentence_level_metric, preds, targets):
+    def compute_reward(self, sampled_sentence, targets):
       with torch.no_grad():
         if self.metric == "CHRF":
           chrf = CHRF()
           eps = 1
-          R = torch.tensor([chrf.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
+          R = chrf.corpus_score(sampled_sentence, targets).score
           R = 100/(R+eps)
         elif self.metric == "COMET":
           ter = TER()
