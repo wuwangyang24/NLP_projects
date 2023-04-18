@@ -39,7 +39,8 @@ class RLCriterion(FairseqCriterion):
         #padding mask, do not remove
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
-
+        
+        print(outputs)
         outputs_softmax,outputs_argmax = self.sampling(outputs)
         #convert to string sentence
         print(outputs_argmax)
