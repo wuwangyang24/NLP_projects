@@ -70,9 +70,8 @@ class RLCriterion(FairseqCriterion):
       with torch.no_grad():
         if self.metric == "CHRF":
           chrf = CHRF()
-          eps = 1
           R = chrf.corpus_score(sampled_sentence, targets).score
-          R = 100/(R+eps)
+          R = 100-R
         elif self.metric == "COMET":
           ter = TER()
           R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
