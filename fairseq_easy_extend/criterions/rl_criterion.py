@@ -44,6 +44,7 @@ class RLCriterion(FairseqCriterion):
         
         print(outputs)
         print(targets)
+        print(self.tgt_dict.string(targets))
         outputs_softmax,outputs_argmax = self.sampling(outputs)
         #convert to string sentence
         print(outputs_argmax)
