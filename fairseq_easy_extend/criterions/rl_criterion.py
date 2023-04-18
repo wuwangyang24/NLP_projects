@@ -35,24 +35,21 @@ class RLCriterion(FairseqCriterion):
         targets: batch x len
         masks:   batch x len
         """
-        
-        print(outputs)
-        print(masks)
+
         #padding mask, do not remove
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
         
-        print(outputs)
-        print(targets)
-        print(self.tgt_dict.string(targets))
         outputs_softmax,outputs_argmax = self.sampling(outputs)
         #convert to string sentence
-        print(outputs_argmax)
-        sampled_sentences = [self.tgt_dict.string(sentence) if sentence.numel()>0 else "" for sentence in outputs_argmax]
-        targets = [self.tgt_dict.string(sentence) if sentence.numel()>0 else "" for sentence in targets]
-        targets = [[sentence.replace('<pad>','').strip()] for sentence in targets]
-        print(sampled_sentences[0])
-        print(targets[0])
+
+#         sampled_sentences = [self.tgt_dict.string(sentence) if sentence.numel()>0 else "" for sentence in outputs_argmax]
+#         targets = [self.tgt_dict.string(sentence) if sentence.numel()>0 else "" for sentence in targets]
+#         targets = [[sentence.replace('<pad>','').strip()] for sentence in targets]
+        sampled_sentence = self.tgt_dict.string(outputs_argmax)
+        targets = self.tgt_dict.string(targets)
+        print(f"sampled sentence: {sampled_sentences}")
+        print(f"target sentence: {targets}")
         #compute loss
         R = self.compute_reward(self.metric, sampled_sentences, targets)
         R = R.to(outputs_softmax.device)
@@ -106,7 +103,6 @@ class RLCriterion(FairseqCriterion):
                       samples['net_input']['src_lengths'], 
                       samples['prev_target'], 
                       samples['target'])
-      print(outputs)
       targets = samples['target']
       loss = self._compute_loss(outputs['word_ins']['out'], 
                                 targets, 
