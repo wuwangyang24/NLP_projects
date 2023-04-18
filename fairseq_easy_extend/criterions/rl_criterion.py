@@ -48,7 +48,7 @@ class RLCriterion(FairseqCriterion):
 #         targets = [[sentence.replace('<pad>','').strip()] for sentence in targets]
         sampled_sentence = self.tgt_dict.string(outputs_argmax)
         targets = self.tgt_dict.string(targets)
-        print(f"sampled sentence: {sampled_sentences}")
+        print(f"sampled sentence: {sampled_sentence}")
         print(f"target sentence: {targets}")
         #compute loss
         R = self.compute_reward(self.metric, sampled_sentences, targets)
