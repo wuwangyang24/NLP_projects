@@ -79,7 +79,7 @@ class RLCriterion(FairseqCriterion):
 
     ## Compute the log probability of outputs 
     def log_prob(self, outputs):
-      log_prob = torch.log(outputs_prob.values)
+      log_prob = torch.log(outputs)
       log_prob = torch.sum(log_prob, dim=-1)
       return log_prob
 
@@ -90,7 +90,7 @@ class RLCriterion(FairseqCriterion):
       outputs_softmax = soft_max(outputs)
       #argmax over softmax 
       outputs_argmax = torch.argmax(outputs_softmax,dim=-1)
-      return outputs_softmax.max(dim=-1),outputs_argmax
+      return outputs_softmax.max(dim=-1).values,outputs_argmax
 
 
     def forward(self, model, samples, reduce=True):
