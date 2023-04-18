@@ -45,7 +45,7 @@ class RLCriterion(FairseqCriterion):
         # outputs_softmax = soft_max(outputs)
         # #argmax over softmax 
         # outputs_argmax = torch.argmax(outputs_softmax,dim=-1)
-        outputs_softmax,outputs_argmax = self.sampling(outputs)
+        outputs_softmax,outputs_argmax = self.sampling(outputs['out'])
         #convert to string sentence
         sampled_sentences = [self.tgt_dict.string(sentence) for sentence in outputs_argmax]
         targets = [self.tgt_dict.string(sentence) for sentence in targets]
@@ -103,12 +103,12 @@ class RLCriterion(FairseqCriterion):
     def forward(self, model, samples, reduce=True):
       outputs = model(samples['net_input']['src_tokens'], 
                       samples['net_input']['src_lengths'], 
-                      samples['net_input']['prev_output_tokens'], 
+                      samples['prev_target'], 
                       samples['target'])
       targets = samples['target']
-      loss = self._compute_loss(outputs['word_ins']['out'], 
+      loss = self._compute_loss(outputs['word_ins'], 
                                 targets, 
-                                # masks=outputs['word_ins']['mask'],
+                                masks=outputs['word_ins'].get('mask',None),
                                 # label_smoothing=outputs['word_ins']['ls'],
                                 # factor=outputs['length']['factor']
       )
