@@ -37,6 +37,7 @@ class RLCriterion(FairseqCriterion):
         """
         
         print(outputs)
+        print(mask)
         #padding mask, do not remove
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
