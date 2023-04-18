@@ -42,8 +42,8 @@ class RLCriterion(FairseqCriterion):
 
         outputs_softmax,outputs_argmax = self.sampling(outputs)
         #convert to string sentence
-        sampled_sentences = [self.tgt_dict.string(sentence) if sentence.size()[0]>0 else "" for sentence in outputs_argmax]
-        targets = [self.tgt_dict.string(sentence) if sentence.size()[0]>0 else "" for sentence in targets]
+        sampled_sentences = [self.tgt_dict.string(sentence) if sentence.numel()>0 else "" for sentence in outputs_argmax]
+        targets = [self.tgt_dict.string(sentence) if sentence.numel()>0 else "" for sentence in targets]
         targets = [[sentence.replace('<pad>','').strip()] for sentence in targets]
         print(sampled_sentences[0])
         print(targets[0])
