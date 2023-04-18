@@ -120,7 +120,7 @@ class RLCriterion(FairseqCriterion):
         print(f"repetition: {repetition}")
         return loss, sample_size, outputs_logging
 
-    def compute_repetition(self, outputs):
+    def compute_repetition(self, outputs, masks):
         if masks is not None:
             outputs = outputs[masks]
         outputs_softmax,outputs_argmax = self.sampling(outputs)
