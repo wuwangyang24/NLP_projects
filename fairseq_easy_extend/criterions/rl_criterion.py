@@ -113,15 +113,17 @@ class RLCriterion(FairseqCriterion):
                          'nsentences':nsentences, 
                          'ntokens': ntokens,
                          'sample_size': sample_size,
-                         'repetition': self.compute_repetition(outputs['word_ins']['out'])/nsentences
+                         'repetition': self.compute_repetition(outputs['word_ins']['out'], outputs['word_ins'].get('mask',None))
                          }
       return loss, sample_size, outputs_logging
 
     def compute_repetition(self, outputs):
-      outputs_softmax,outputs_argmax = self.sampling(outputs)
-      sampled_sentences = [self.tgt_dict.string(sentence) for sentence in outputs_argmax]
-      repetition_sum = sum([len(sentence.split())-len(set(sentence.split())) for sentence in sampled_sentences])
-      return repetition_sum
+        if masks is not None:
+            outputs = outputs[masks]
+        outputs_softmax,outputs_argmax = self.sampling(outputs)
+        sampled_sentence = self.tgt_dict.string(outputs_argmax)
+        repetition = len(sampled_sentence.split())-len(set(sampled_sentence.split())
+        return repetition
 
     @staticmethod
     def reduce_metrics(logging_outputs: List[Dict[str, Any]]) -> None:  
