@@ -94,28 +94,31 @@ class RLCriterion(FairseqCriterion):
 
 
     def forward(self, model, samples, reduce=True):
-      outputs = model(samples['net_input']['src_tokens'], 
+        outputs = model(samples['net_input']['src_tokens'], 
                       samples['net_input']['src_lengths'], 
                       samples['prev_target'], 
                       samples['target'])
-      targets = samples['target']
-      loss = self._compute_loss(outputs['word_ins']['out'], 
+        targets = samples['target']
+        loss = self._compute_loss(outputs['word_ins']['out'], 
                                 targets, 
                                 masks=outputs['word_ins'].get('mask',None),
                                 # label_smoothing=outputs['word_ins']['ls'],
                                 # factor=outputs['length']['factor']
-      )
-      nsentences = samples['nsentences']
-      ntokens = samples['ntokens']
-      sample_size = 1
-      outputs_logging = {
+        )
+        repetition = self.compute_repetition(outputs['word_ins']['out'], outputs['word_ins'].get('mask',None))
+        nsentences = samples['nsentences']
+        ntokens = samples['ntokens']
+        sample_size = 1
+        outputs_logging = {
                          'loss': loss.detach(),
                          'nsentences':nsentences, 
                          'ntokens': ntokens,
                          'sample_size': sample_size,
-                         'repetition': self.compute_repetition(outputs['word_ins']['out'], outputs['word_ins'].get('mask',None))
+                         'repetition': repetition
                          }
-      return loss, sample_size, outputs_logging
+        print(f"Loss: {loss}")
+        print(f"repetition: {repetition}")
+        return loss, sample_size, outputs_logging
 
     def compute_repetition(self, outputs):
         if masks is not None:
