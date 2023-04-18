@@ -114,10 +114,10 @@ class RLCriterion(FairseqCriterion):
                          'nsentences':nsentences, 
                          'ntokens': ntokens,
                          'sample_size': sample_size,
-                         'repetition': repetition
+                         'repetition': repetition/nsentences
                          }
         print(f"Loss: {loss}")
-        print(f"repetition: {repetition}")
+        print(f"repetition: {repetition/nsentences}")
         return loss, sample_size, outputs_logging
 
     def compute_repetition(self, outputs, masks):
@@ -131,13 +131,15 @@ class RLCriterion(FairseqCriterion):
     @staticmethod
     def reduce_metrics(logging_outputs: List[Dict[str, Any]]) -> None:  
         """Aggregate logging outputs from data parallel training."""
-        loss_sum = sum(log.get("loss", 0) for log in logging_outputs)
+        loss = [log.get("loss", 0) for log in logging_outputs]
+        loss = sum(loss)/len(loss)
         nsentences = sum(log.get("nsentences", 0) for log in logging_outputs)
         ntokens = sum(log.get("ntokens", 0) for log in logging_outputs)
         sample_size = sum(log.get("sample_size", 0) for log in logging_outputs)
-        repetition_sum = sum(log.get("repetition", 0) for log in logging_outputs)
+        repetition = [log.get("repetition", 0) for log in logging_outputs]
+        repetition = sum(repetition)/len(repetition)
         
         print(logging_outputs)
-        metrics.log_scalar("loss", loss_sum)
-        metrics.log_scalar('repetition', repetition_sum)
+        metrics.log_scalar("loss", loss)
+        metrics.log_scalar('repetition', repetition)
 
