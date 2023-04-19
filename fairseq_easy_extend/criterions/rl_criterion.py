@@ -48,7 +48,8 @@ class RLCriterion(FairseqCriterion):
         #convert to string sentence
         sampled_sentence = [self.tgt_dict.string(sample) for sample in outputs_ids]
         targets = self.tgt_dict.string(targets)
-        print(f"sampled sentence: {sampled_sentence}")
+        for i in range(len(sampled_sentence)):
+          print(f"SAMPLE SENTENCE {i}: {sampled_sentence[i]}")
         print(f"target sentence: {targets}")
         #compute risk
         R = torch.tensor([self.compute_risk([sentence], [[targets]]) for sentence in sampled_sentence])
