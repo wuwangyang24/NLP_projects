@@ -46,7 +46,7 @@ class RLCriterion(FairseqCriterion):
         print(f"sampled sentence: {sampled_sentence}")
         print(f"target sentence: {targets}")
         #compute loss
-        R = self.compute_reward(sampled_sentence, [targets])
+        R = self.compute_risk(sampled_sentence, [targets])
         # R = R.to(outputs_softmax.device)
         print(f"R:{R}")
         print(f"log:{-self.log_prob(outputs_softmax)}")
@@ -66,7 +66,7 @@ class RLCriterion(FairseqCriterion):
         return loss
 
     ## Calculate reward
-    def compute_reward(self, sampled_sentence, targets):
+    def compute_risk(self, sampled_sentence, targets):
       with torch.no_grad():
         if self.metric == "CHRF":
           chrf = CHRF()
