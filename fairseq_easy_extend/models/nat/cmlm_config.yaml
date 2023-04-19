@@ -23,19 +23,19 @@ optimizer:
   adam_betas: (0.9,0.98)
 lr_scheduler:
   _name: inverse_sqrt
-  warmup_updates: 2000
+  warmup_updates: 200
   warmup_init_lr: 1e-07
 dataset:
-  max_tokens: 8192
-  validate_interval_updates: 1000
+  max_tokens: 80
+  validate_interval_updates: 20
 optimization:
   lr: [0.0005]
-  update_freq: [8]
+  update_freq: [4]
   max_update: 5000
   stop_min_lr: 1e-09
 checkpoint:
   no_epoch_checkpoints: true
 common:
   log_format: simple
-  log_interval: 20
+  log_interval: 10
   tensorboard_logdir: /content/drive/MyDrive/NLP_project_1
