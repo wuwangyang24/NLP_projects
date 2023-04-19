@@ -34,7 +34,14 @@ class RLCriterion(FairseqCriterion):
         targets: batch x len
         masks:   batch x len
         """
-
+        
+        #softmax outputs
+        soft_max = torch.nn.Softmax(dim=-1)
+        outputs = soft_max(outputs)
+        print(outputs.size())
+        print(targets)
+        print(targets.max())
+        
         #padding mask, do not remove
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
@@ -85,17 +92,17 @@ class RLCriterion(FairseqCriterion):
 
     ## sample
     def sampling(self, outputs, sample_type:str="argmax", n:int=1):
-        #softmax over outputs
-        soft_max = torch.nn.Softmax(dim=-1)
-        outputs_softmax = soft_max(outputs)     
+#         #softmax over outputs
+#         soft_max = torch.nn.Softmax(dim=-1)
+#         outputs_softmax = soft_max(outputs)     
         if sample_type == "argmax":
             #argmax over softmax 
-            outputs_ids = torch.argmax(outputs_softmax,dim=-1)
-            outputs_prob = outputs_softmax.max(dim=-1).values
+            outputs_ids = torch.argmax(outputs,dim=-1)
+            outputs_prob = outputs.max(dim=-1).values
         else:
             #multinomial sampling
-            outputs_ids = torch.multinomial(outputs_softmax, n, True)
-            outputs_prob = torch.tensor([torch.gather(outputs_softmax, dim=-1, indices=outputs_multinomial[:,col].unsqueeze(-1)).squeeze(-1) for col in range(n)])
+            outputs_ids = torch.multinomial(outputs, n, True)
+            outputs_prob = torch.tensor([torch.gather(outputs, dim=-1, indices=outputs_multinomial[:,col].unsqueeze(-1)).squeeze(-1) for col in range(n)])
         return outputs_prob, outputs_ids
 
 
