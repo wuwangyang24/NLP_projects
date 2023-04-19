@@ -45,27 +45,16 @@ class RLCriterion(FairseqCriterion):
         print(outputs.size())
         print(targets.size())
         
-        outputs_prob, outputs_ids = self.sampling(outputs, "argmax")
+        log_prob, outputs_ids = self.sampling(outputs, "multinomial",n=5)
         #convert to string sentence
-        sampled_sentence = self.tgt_dict.string(outputs_ids)
+        sampled_sentence = [self.tgt_dict.string(sample) for sample in outputs_ids]
         targets = self.tgt_dict.string(targets)
         print(f"sampled sentence: {sampled_sentence}")
         print(f"target sentence: {targets}")
-        #compute loss
-        R = self.compute_risk([sampled_sentence], [[targets]])
+        #compute risk
+        R = torch.tensor([self.compute_risk([sentence], [[targets]]) for sentence in sampled_sentence])
         print(f"R:{R}")
-        print(f"log:{-self.log_prob(outputs_prob)}")
-        loss = -self.log_prob(outputs_prob)*R
-
-        #argmax over the softmax \ sampling (e.g. multinomial)
-        #sampled_sentence = [4, 17, 18, 19, 20]
-        #sampled_sentence_string = tgt_dict.string([4, 17, 18, 19, 20])
-        #target_sentence = "I am a sentence"
-        #with torch.no_grad()
-            #R(*) = eval_metric(sampled_sentence_string, target_sentence)
-            #R(*) is a number, BLEU, сhrf, etc.
-        #loss = -log_prob(outputs)*R()
-
+        loss = -log_prob*R
         loss = loss.mean()
         print(loss)
         return loss
@@ -82,26 +71,25 @@ class RLCriterion(FairseqCriterion):
           R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
       return R
 
-    ## Compute the log probability of outputs 
-    def log_prob(self, outputs_prob):
-      log_prob = torch.log(outputs_prob)
-      log_prob = torch.sum(log_prob, dim=-1)
-      return log_prob
-
     ## sample
-    def sampling(self, outputs_masked, sample_type:str="argmax", n:int=1):
+    def sampling(self, outputs, sample_type:str="argmax", n:int=1):
 #         #softmax over outputs
 #         soft_max = torch.nn.Softmax(dim=-1)
 #         outputs_softmax = soft_max(outputs)     
         if sample_type == "argmax":
             #argmax over softmax 
-            outputs_ids = torch.argmax(outputs_masked,dim=-1)
-            outputs_prob = outputs_masked.max(dim=-1).values
+            outputs_ids = torch.argmax(outputs,dim=-1)
+            outputs_prob = outputs.max(dim=-1).values
+            log_prob = torch.log(outputs_prob)
+            log_prob = torch.sum(log_prob, dim=-1)
+            
         else:
             #multinomial sampling
-            outputs_ids = torch.multinomial(outputs_masked, n, True)
-            outputs_prob = torch.tensor([torch.gather(outputs_masked, dim=-1, indices=outputs_multinomial[:,col].unsqueeze(-1)).squeeze(-1) for col in range(n)])
-        return outputs_prob, outputs_ids
+            outputs_ids = torch.multinomial(outputs, n, True)
+            log_prob = torch.sum(torch.log(torch.gather(outputs, dim=-1, index=outputs_ids).T),dim=-1)
+            print(log_prob)
+            outputs_ids = outputs_ids.T
+        return log_prob, outputs_ids
 
 
     def forward(self, model, samples, reduce=True):
@@ -153,4 +141,3 @@ class RLCriterion(FairseqCriterion):
         print(logging_outputs)
         metrics.log_scalar("loss", loss)
         metrics.log_scalar('repetition', repetition)
-
