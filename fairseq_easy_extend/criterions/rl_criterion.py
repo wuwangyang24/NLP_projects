@@ -43,8 +43,6 @@ class RLCriterion(FairseqCriterion):
         #padding mask, do not remove
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
-        print(outputs.size())
-        print(targets.size())
         
         log_prob, outputs_ids = self.sampling(outputs, "multinomial",n=5)
         #convert to string sentence
@@ -60,7 +58,7 @@ class RLCriterion(FairseqCriterion):
         
         #compute repetition
         self.repetition = self.compute_repetition(sampled_sentence, targets)
-        
+
         print(loss)
         return loss
 
