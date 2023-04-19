@@ -39,18 +39,18 @@ class RLCriterion(FairseqCriterion):
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
         
-        outputs_softmax,outputs_argmax = self.sampling(outputs)
+        outputs_prob, outputs_ids = self.sampling(outputs, "argmax")
         #convert to string sentence
-        sampled_sentence = self.tgt_dict.string(outputs_argmax)
+        sampled_sentence = self.tgt_dict.string(outputs_ids)
         targets = self.tgt_dict.string(targets)
         print(f"sampled sentence: {sampled_sentence}")
         print(f"target sentence: {targets}")
         #compute loss
-        R = self.compute_risk(sampled_sentence, [targets])
+        R = self.compute_risk([sampled_sentence], [[targets]])
         # R = R.to(outputs_softmax.device)
         print(f"R:{R}")
-        print(f"log:{-self.log_prob(outputs_softmax)}")
-        loss = -self.log_prob(outputs_softmax)*R
+        print(f"log:{-self.log_prob(outputs_prob)}")
+        loss = -self.log_prob(outputs_prob)*R
 
         #argmax over the softmax \ sampling (e.g. multinomial)
         #sampled_sentence = [4, 17, 18, 19, 20]
@@ -61,7 +61,7 @@ class RLCriterion(FairseqCriterion):
             #R(*) is a number, BLEU, сhrf, etc.
         #loss = -log_prob(outputs)*R()
 
-#         loss = loss.mean()
+        loss = loss.mean()
         print(loss)
         return loss
 
@@ -83,14 +83,20 @@ class RLCriterion(FairseqCriterion):
       log_prob = torch.sum(log_prob, dim=-1)
       return log_prob
 
-    ## sample using argmax
-    def sampling(self,outputs):
-      #softmax over outputs
-      soft_max = torch.nn.Softmax(dim=-1)
-      outputs_softmax = soft_max(outputs)
-      #argmax over softmax 
-      outputs_argmax = torch.argmax(outputs_softmax,dim=-1)
-      return outputs_softmax.max(dim=-1).values,outputs_argmax
+    ## sample
+    def sampling(self, outputs, sample_type:str="argmax", n:int=1):
+        #softmax over outputs
+        soft_max = torch.nn.Softmax(dim=-1)
+        outputs_softmax = soft_max(outputs)     
+        if sample_type == "argmax":
+            #argmax over softmax 
+            outputs_ids = torch.argmax(outputs_softmax,dim=-1)
+            outputs_prob = outputs_softmax.max(dim=-1).values
+        else:
+            #multinomial sampling
+            outputs_ids = torch.multinomial(outputs_softmax, n, True)
+            outputs_prob = torch.tensor([torch.gather(outputs_softmax, dim=-1, indices=outputs_multinomial[:,col].unsqueeze(-1)).squeeze(-1) for col in range(n)])
+        return outputs_prob, outputs_ids
 
 
     def forward(self, model, samples, reduce=True):
