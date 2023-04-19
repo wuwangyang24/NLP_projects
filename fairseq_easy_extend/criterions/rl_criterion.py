@@ -25,6 +25,7 @@ class RLCriterion(FairseqCriterion):
         self.metric = sentence_level_metric
         self.tgt_dict = task.target_dictionary
         print(f"metric: {self.metric}")
+        self.repetition = None
 
     def _compute_loss(
         self, outputs, targets, masks=None, label_smoothing=0.0, name="loss", factor=1.0
@@ -56,6 +57,10 @@ class RLCriterion(FairseqCriterion):
         print(f"R:{R}")
         loss = -log_prob*R
         loss = loss.mean()
+        
+        #compute repetition
+        self.repetition = self.compute_repetition(sampled_sentence, targets)
+        
         print(loss)
         return loss
 
@@ -104,7 +109,6 @@ class RLCriterion(FairseqCriterion):
                                 # label_smoothing=outputs['word_ins']['ls'],
                                 # factor=outputs['length']['factor']
         )
-        repetition = self.compute_repetition(outputs['word_ins']['out'], outputs['word_ins'].get('mask',None))
         nsentences = samples['nsentences']
         ntokens = samples['ntokens']
         sample_size = 1
@@ -113,19 +117,16 @@ class RLCriterion(FairseqCriterion):
                          'nsentences':nsentences, 
                          'ntokens': ntokens,
                          'sample_size': sample_size,
-                         'repetition': repetition/nsentences
+                         'repetition': self.repetition
                          }
         print(f"Loss: {loss}")
-        print(f"repetition: {repetition/nsentences}")
+        print(f"repetition: {self.repetition}")
         return loss, sample_size, outputs_logging
 
-    def compute_repetition(self, outputs, masks):
-        if masks is not None:
-            outputs = outputs[masks]
-        outputs_softmax,outputs_argmax = self.sampling(outputs)
-        sampled_sentence = self.tgt_dict.string(outputs_argmax)
-        repetition = len(sampled_sentence.split())-len(set(sampled_sentence.split()))
-        return repetition
+    def compute_repetition(self, sample_sentence, targets):
+        repetition_sample = sum([len(sentence.split())-len(set(sentence.split())) for sentence in sample_sentence])/len(sample_sentence)
+        repetition_target = len(targets.split())-len(set(targets.split()))
+        return repetition_sample-repetition_target
 
     @staticmethod
     def reduce_metrics(logging_outputs: List[Dict[str, Any]]) -> None:  
