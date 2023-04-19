@@ -61,7 +61,7 @@ class RLCriterion(FairseqCriterion):
             #R(*) is a number, BLEU, сhrf, etc.
         #loss = -log_prob(outputs)*R()
 
-        loss = loss.mean()
+#         loss = loss.mean()
         print(loss)
         return loss
 
