@@ -38,13 +38,12 @@ class RLCriterion(FairseqCriterion):
         #softmax outputs
         soft_max = torch.nn.Softmax(dim=-1)
         outputs = soft_max(outputs)
-        print(outputs.size())
-        print(targets)
-        print(targets.max())
         
         #padding mask, do not remove
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
+        print(outputs.size())
+        print(targets.size())
         
         outputs_prob, outputs_ids = self.sampling(outputs, "argmax")
         #convert to string sentence
@@ -54,7 +53,6 @@ class RLCriterion(FairseqCriterion):
         print(f"target sentence: {targets}")
         #compute loss
         R = self.compute_risk([sampled_sentence], [[targets]])
-        # R = R.to(outputs_softmax.device)
         print(f"R:{R}")
         print(f"log:{-self.log_prob(outputs_prob)}")
         loss = -self.log_prob(outputs_prob)*R
@@ -85,8 +83,8 @@ class RLCriterion(FairseqCriterion):
       return R
 
     ## Compute the log probability of outputs 
-    def log_prob(self, outputs):
-      log_prob = torch.log(outputs)
+    def log_prob(self, outputs_prob):
+      log_prob = torch.log(outputs_prob)
       log_prob = torch.sum(log_prob, dim=-1)
       return log_prob
 
