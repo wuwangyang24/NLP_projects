@@ -89,18 +89,18 @@ class RLCriterion(FairseqCriterion):
       return log_prob
 
     ## sample
-    def sampling(self, outputs, sample_type:str="argmax", n:int=1):
+    def sampling(self, outputs_masked, sample_type:str="argmax", n:int=1):
 #         #softmax over outputs
 #         soft_max = torch.nn.Softmax(dim=-1)
 #         outputs_softmax = soft_max(outputs)     
         if sample_type == "argmax":
             #argmax over softmax 
-            outputs_ids = torch.argmax(outputs,dim=-1)
-            outputs_prob = outputs.max(dim=-1).values
+            outputs_ids = torch.argmax(outputs_masked,dim=-1)
+            outputs_prob = outputs_masked.max(dim=-1).values
         else:
             #multinomial sampling
-            outputs_ids = torch.multinomial(outputs, n, True)
-            outputs_prob = torch.tensor([torch.gather(outputs, dim=-1, indices=outputs_multinomial[:,col].unsqueeze(-1)).squeeze(-1) for col in range(n)])
+            outputs_ids = torch.multinomial(outputs_masked, n, True)
+            outputs_prob = torch.tensor([torch.gather(outputs_masked, dim=-1, indices=outputs_multinomial[:,col].unsqueeze(-1)).squeeze(-1) for col in range(n)])
         return outputs_prob, outputs_ids
 
 
