@@ -50,7 +50,7 @@ class RLCriterion(FairseqCriterion):
         # R = R.to(outputs_softmax.device)
         print(f"R:{R}")
         print(f"log:{-self.log_prob(outputs_softmax)}")
-        loss = torch.mul(-self.log_prob(outputs_softmax),R)
+        loss = -self.log_prob(outputs_softmax)*R
 
         #argmax over the softmax \ sampling (e.g. multinomial)
         #sampled_sentence = [4, 17, 18, 19, 20]
