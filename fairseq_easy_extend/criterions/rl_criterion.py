@@ -129,9 +129,9 @@ class RLCriterion(FairseqCriterion):
         return loss, sample_size, outputs_logging
 
     def compute_repetition(self, sample_sentence, targets):
-        repetition_sample = sum([len(sentence.split())-len(set(sentence.split())) for sentence in sample_sentence])/len(sample_sentence)
+        repetition_sample = len(sample_sentence.split())-len(set(sample_sentence.split()))
         repetition_target = len(targets.split())-len(set(targets.split()))
-        return repetition_sample-repetition_target
+        return repetition_sample/repetition_target
 
     @staticmethod
     def reduce_metrics(logging_outputs: List[Dict[str, Any]]) -> None:  
