@@ -51,22 +51,22 @@ class RLCriterion(FairseqCriterion):
         print(target_sent_str)
         
         #compute evaluation score
-        reward = torch.full((batch_size, sent_len),self.compute_risk(sample_sent_str, target_sent_str))
+        R = torch.full((batch_size, sent_len),self.compute_risk(sample_sent_str, target_sent_str))
         
         #padding mask, do not remove
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
-            sample_sent_idx, reward = sample_sent_idx[masks], reward[masks]
+            sample_sent_idx, R = sample_sent_idx[masks], R[masks]
             
         print(outputs.size(), sample_sent_idx.size())
         
-        loss = -log_prob*R
+        outputs_logprob = F.log_softmax(outputs)
+        sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
+        loss = -sample_logprob*R
         loss = loss.mean()
-        
+        print(loss)
         #compute repetition
         self.repetition = self.compute_repetition(sampled_sentence, targets)
-
-        print(loss)
         return loss
 
     ## Calculate reward
