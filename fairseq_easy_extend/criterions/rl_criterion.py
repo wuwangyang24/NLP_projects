@@ -50,7 +50,7 @@ class RLCriterion(FairseqCriterion):
         # print(target_sent_str)
         
         #compute evaluation score
-        R = self.compute_risk(sample_sent_str, target_sent_str, sent_len)
+        R = self.compute_reward(sample_sent_str, target_sent_str, sent_len)
         R = R.to(outputs.device)
         
         #padding mask, do not remove
@@ -62,7 +62,7 @@ class RLCriterion(FairseqCriterion):
         
         outputs_logprob = F.log_softmax(outputs, dim=-1)
         sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
-        loss = -sample_logprob*R
+        loss = torch.sum(-sample_logprob*R, dim=-1)
         loss = loss.mean()
         print(loss)
         #compute repetition
@@ -70,7 +70,7 @@ class RLCriterion(FairseqCriterion):
         return loss
 
     ## Calculate reward
-    def compute_risk(self, sampled_sentences, targets, sent_len):
+    def compute_reward(self, sampled_sentences, targets, sent_len):
         with torch.no_grad():
             if self.metric == "CHRF":
                 chrf = CHRF()
