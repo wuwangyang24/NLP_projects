@@ -44,14 +44,15 @@ class RLCriterion(FairseqCriterion):
         sample_sent_idx = torch.multinomial(outputs_prob, 1, True).view(batch_size, sent_len)
         
         #convert to string sentence
-        sample_sent_str = self.tgt_dict.string(sample_sent_idx)
-        target_sent_str = self.tgt_dict.string(targets)
+        sample_sent_str = [self.tgt_dict.string(sample) for sample in sample_sent_idx]
+        target_sent_str = [self.tgt_dict.string(target) for target in targets]
         
         print(sample_sent_str)
         print(target_sent_str)
         
         #compute evaluation score
-        R = torch.full((batch_size, sent_len),self.compute_risk(sample_sent_str, target_sent_str))
+        R = self.compute_risk(sample_sent_str, target_sent_str, sent_len)
+        print(R)
         
         #padding mask, do not remove
         if masks is not None:
@@ -70,15 +71,16 @@ class RLCriterion(FairseqCriterion):
         return loss
 
     ## Calculate reward
-    def compute_risk(self, sampled_sentence, targets):
-      with torch.no_grad():
-        if self.metric == "CHRF":
-          chrf = CHRF()
-          R = chrf.corpus_score([sampled_sentence], [[targets]]).score
-          R = 100-R
-        elif self.metric == "COMET":
-          ter = TER()
-          R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
+    def compute_risk(self, sampled_sentences, targets, sent_len):
+        with torch.no_grad():
+            if self.metric == "CHRF":
+                chrf = CHRF()
+                R = torch.tensor([chrf.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
+                R = torch.repeat(sent_len, 1).T
+                R = 100-R
+            elif self.metric == "COMET":
+                ter = TER()
+                R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
       return R
 
     ## sample
@@ -128,10 +130,9 @@ class RLCriterion(FairseqCriterion):
         print(f"repetition: {self.repetition}")
         return loss, sample_size, outputs_logging
 
-    def compute_repetition(self, sample_sentence, targets):
-        repetition_sample = len(sample_sentence.split())-len(set(sample_sentence.split()))
-        repetition_target = len(targets.split())-len(set(targets.split()))
-        return repetition_sample/repetition_target
+    def compute_repetition(self, sample_sentences, targets):
+        repetition_ratio = [(len(sample.split())-len(set(sample.split())))/(len(target.split())-len(set(target.split()))) for sample,target in zip(sample_sentences,targets)]
+        return sum(repetition_ratio)/len(repetition_target)
 
     @staticmethod
     def reduce_metrics(logging_outputs: List[Dict[str, Any]]) -> None:  
