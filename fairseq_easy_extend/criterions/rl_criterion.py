@@ -62,7 +62,10 @@ class RLCriterion(FairseqCriterion):
         
         outputs_logprob = F.log_softmax(outputs, dim=-1)
         sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
-        loss = torch.sum(-sample_logprob*R, dim=-1)
+        print(sample_logprob)
+        print(sample_logprob.size())
+
+        loss = -sample_logprob*R
         loss = loss.mean()
 #         print(loss)
         #compute repetition
