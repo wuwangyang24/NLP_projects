@@ -41,7 +41,7 @@ class RLCriterion(FairseqCriterion):
         outputs_prob = F.softmax(outputs, dim=-1).view(-1, vocab_size)
         
         #multinomial sampling 
-        sample_sent_idx = torch.multinomial(outputs, 1, True).view(batch_size, sent_len)
+        sample_sent_idx = torch.multinomial(outputs_prob, 1, True).view(batch_size, sent_len)
         
         #convert to string sentence
         sample_sent_str = self.tgt_dict.string(sample_sent_idx)
