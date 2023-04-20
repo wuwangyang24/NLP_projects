@@ -38,7 +38,7 @@ class RLCriterion(FairseqCriterion):
         batch_size, sent_len, vocab_size = outputs.size()[0], outputs.size()[1], outputs.size()[2]
         
         #softmax outputs
-        outputs_prob = F.softmax(outputs, dim=-1).view(-1, vocab_size)
+        outputs_prob = F.softmax(outputs/1.5, dim=-1).view(-1, vocab_size)
         
         #multinomial sampling 
         sample_sent_idx = torch.multinomial(outputs_prob, 1, True).view(batch_size, sent_len)
@@ -62,8 +62,6 @@ class RLCriterion(FairseqCriterion):
         
         outputs_logprob = F.log_softmax(outputs, dim=-1)
         sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
-        print(sample_logprob)
-        print(sample_logprob.size())
 
         loss = -sample_logprob*R
         loss = loss.mean()
