@@ -82,7 +82,7 @@ class RLCriterion(FairseqCriterion):
             elif self.metric == "COMET":
                 ter = TER()
                 R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
-      return R
+        return R
 
     ## sample
     def sampling(self, outputs, sample_type:str="argmax", n:int=1):
