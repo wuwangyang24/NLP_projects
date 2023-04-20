@@ -45,15 +45,13 @@ class RLCriterion(FairseqCriterion):
         
         #convert to string sentence
         sample_sent_str = [self.tgt_dict.string(sample) for sample in sample_sent_idx]
-        target_sent_str = [self.tgt_dict.string(target) for target in targets]
-        
-        print(sample_sent_str)
-        print(target_sent_str)
+        target_sent_str = [self.tgt_dict.string(target).replace("<pad>", "").strip() for target in targets]        
+        # print(sample_sent_str)
+        # print(target_sent_str)
         
         #compute evaluation score
         R = self.compute_risk(sample_sent_str, target_sent_str, sent_len)
         R = R.to(outputs.device)
-        print(R)
         
         #padding mask, do not remove
         if masks is not None:
@@ -68,7 +66,7 @@ class RLCriterion(FairseqCriterion):
         loss = loss.mean()
         print(loss)
         #compute repetition
-        self.repetition = self.compute_repetition(sampled_sentence, targets)
+        self.repetition = self.compute_repetition(sample_sent_str, target_sent_str)
         return loss
 
     ## Calculate reward
@@ -77,7 +75,7 @@ class RLCriterion(FairseqCriterion):
             if self.metric == "CHRF":
                 chrf = CHRF()
                 R = torch.tensor([chrf.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
-                R = torch.repeat(sent_len, 1).T
+                R = R.repeat(sent_len, 1).T
                 R = 100-R
             elif self.metric == "COMET":
                 ter = TER()
@@ -133,7 +131,7 @@ class RLCriterion(FairseqCriterion):
 
     def compute_repetition(self, sample_sentences, targets):
         repetition_ratio = [(len(sample.split())-len(set(sample.split())))/(len(target.split())-len(set(target.split()))) for sample,target in zip(sample_sentences,targets)]
-        return sum(repetition_ratio)/len(repetition_target)
+        return sum(repetition_ratio)/len(repetition_ratio)
 
     @staticmethod
     def reduce_metrics(logging_outputs: List[Dict[str, Any]]) -> None:  
