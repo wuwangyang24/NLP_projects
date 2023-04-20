@@ -52,6 +52,7 @@ class RLCriterion(FairseqCriterion):
         
         #compute evaluation score
         R = self.compute_risk(sample_sent_str, target_sent_str, sent_len)
+        R = R.to(outputs.device)
         print(R)
         
         #padding mask, do not remove
