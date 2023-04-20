@@ -64,7 +64,7 @@ class RLCriterion(FairseqCriterion):
         sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
         loss = torch.sum(-sample_logprob*R, dim=-1)
         loss = loss.mean()
-        print(loss)
+#         print(loss)
         #compute repetition
         self.repetition = self.compute_repetition(sample_sent_str, target_sent_str)
         return loss
@@ -125,8 +125,8 @@ class RLCriterion(FairseqCriterion):
                          'sample_size': sample_size,
                          'repetition': self.repetition
                          }
-        print(f"Loss: {loss}")
-        print(f"repetition: {self.repetition}")
+#         print(f"Loss: {loss}")
+#         print(f"repetition: {self.repetition}")
         return loss, sample_size, outputs_logging
 
     def compute_repetition(self, sample_sentences, targets):
