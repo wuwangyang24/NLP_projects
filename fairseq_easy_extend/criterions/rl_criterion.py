@@ -35,25 +35,31 @@ class RLCriterion(FairseqCriterion):
         targets: batch x len
         masks:   batch x len
         """
+        batch_size, sent_len, vocab_size = outputs.size()[0], outputs.size()[1], outputs.size()[2]
         
         #softmax outputs
-        soft_max = torch.nn.Softmax(dim=-1)
-        outputs = soft_max(outputs)
+        outputs_prob = F.softmax(outputs, dim=-1).view(-1, vocab_size)
+        
+        #multinomial sampling 
+        sample_sent_idx = torch.multinomial(outputs, 1, True).view(batch_size, sent_len)
+        
+        #convert to string sentence
+        sample_sent_str = self.tgt_dict.string(sample_sent_idx)
+        target_sent_str = self.tgt_dict.string(targets)
+        
+        print(sample_sent_str)
+        print(target_sent_str)
+        
+        #compute evaluation score
+        reward = torch.full((batch_size, sent_len),self.compute_risk(sample_sent_str, target_sent_str))
         
         #padding mask, do not remove
         if masks is not None:
             outputs, targets = outputs[masks], targets[masks]
+            sample_sent_idx, reward = sample_sent_idx[masks], reward[masks]
+            
+        print(outputs.size(), sample_sent_idx.size())
         
-        log_prob, outputs_ids = self.sampling(outputs, "multinomial",n=5)
-        #convert to string sentence
-        sampled_sentence = [self.tgt_dict.string(sample) for sample in outputs_ids]
-        targets = self.tgt_dict.string(targets)
-        for i in range(len(sampled_sentence)):
-          print(f"SAMPLE SENTENCE {i}: {sampled_sentence[i]}")
-        print(f"target sentence: {targets}")
-        #compute risk
-        R = torch.tensor([self.compute_risk([sentence], [[targets]]) for sentence in sampled_sentence])
-        print(f"R:{R}")
         loss = -log_prob*R
         loss = loss.mean()
         
