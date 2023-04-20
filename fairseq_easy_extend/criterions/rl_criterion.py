@@ -60,7 +60,7 @@ class RLCriterion(FairseqCriterion):
             
         print(outputs.size(), sample_sent_idx.size())
         
-        outputs_logprob = F.log_softmax(outputs)
+        outputs_logprob = F.log_softmax(outputs, dim=-1)
         sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
         loss = -sample_logprob*R
         loss = loss.mean()
@@ -83,24 +83,24 @@ class RLCriterion(FairseqCriterion):
         return R
 
     ## sample
-    def sampling(self, outputs, sample_type:str="argmax", n:int=1):
-#         #softmax over outputs
-#         soft_max = torch.nn.Softmax(dim=-1)
-#         outputs_softmax = soft_max(outputs)     
-        if sample_type == "argmax":
-            #argmax over softmax 
-            outputs_ids = torch.argmax(outputs,dim=-1)
-            outputs_prob = outputs.max(dim=-1).values
-            log_prob = torch.log(outputs_prob)
-            log_prob = torch.sum(log_prob, dim=-1)
+#     def sampling(self, outputs, sample_type:str="argmax", n:int=1):
+# #         #softmax over outputs
+# #         soft_max = torch.nn.Softmax(dim=-1)
+# #         outputs_softmax = soft_max(outputs)     
+#         if sample_type == "argmax":
+#             #argmax over softmax 
+#             outputs_ids = torch.argmax(outputs,dim=-1)
+#             outputs_prob = outputs.max(dim=-1).values
+#             log_prob = torch.log(outputs_prob)
+#             log_prob = torch.sum(log_prob, dim=-1)
             
-        else:
-            #multinomial sampling
-            outputs_ids = torch.multinomial(outputs, n, True)
-            log_prob = torch.sum(torch.log(torch.gather(outputs, dim=-1, index=outputs_ids).T),dim=-1)
-            print(log_prob)
-            outputs_ids = outputs_ids.T
-        return log_prob, outputs_ids
+#         else:
+#             #multinomial sampling
+#             outputs_ids = torch.multinomial(outputs, n, True)
+#             log_prob = torch.sum(torch.log(torch.gather(outputs, dim=-1, index=outputs_ids).T),dim=-1)
+#             print(log_prob)
+#             outputs_ids = outputs_ids.T
+#         return log_prob, outputs_ids
 
 
     def forward(self, model, samples, reduce=True):
