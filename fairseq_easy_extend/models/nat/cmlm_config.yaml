@@ -34,7 +34,7 @@ optimization:
   max_update: 5000
   stop_min_lr: 1e-09
 checkpoint:
-  no_epoch_checkpoints: true
+  no_epoch_checkpoints: false
 common:
   log_format: simple
   log_interval: 10
