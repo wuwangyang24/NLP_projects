@@ -132,6 +132,6 @@ class RLCriterion(FairseqCriterion):
         repetition = [log.get("repetition", 0) for log in logging_outputs]
         repetition = sum(repetition)/len(repetition)
         
-        print(logging_outputs)
+#         print(logging_outputs)
         metrics.log_scalar("loss", loss)
         metrics.log_scalar('repetition', repetition)
