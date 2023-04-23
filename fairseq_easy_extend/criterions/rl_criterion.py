@@ -8,6 +8,7 @@ from fairseq.criterions import FairseqCriterion, register_criterion
 from fairseq.dataclass import FairseqDataclass
 from torch import Tensor
 from sacrebleu.metrics import BLEU, CHRF, TER
+import bert_score
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List
@@ -73,17 +74,20 @@ class RLCriterion(FairseqCriterion):
     ## Calculate reward
     def compute_reward(self, sampled_sentences, targets, sent_len):
         with torch.no_grad():
+            #calculate ChrF score
             if self.metric == "CHRF":
                 chrf = CHRF()
                 R = torch.tensor([chrf.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
                 R = R.repeat(sent_len, 1).T
-            elif self.metric == "BLEU":
-                bleu = BLEU()
-                R = torch.tensor([bleu.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
-                R = R.repeat(sent_len, 1).T
-            else:
+            #calculate Ter score
+            elif self.metric == "TER":
                 ter = TER()
-                R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
+                R = torch.tensor([ter.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
+                R = 100 - R.repeat(sent_len, 1).T
+            #calculate BERTscore
+            else:
+                R = torch.tensor([bert_score.score([sample], [target], lang='en', model_type='bert-base-uncased')[2] for sample,target in zip(sampled_sentences,targets)]) 
+                R = R.repeat(sent_len, 1).T 
         return R
 
 
