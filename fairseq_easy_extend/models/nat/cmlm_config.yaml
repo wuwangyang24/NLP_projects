@@ -15,19 +15,17 @@ model:
     learned_pos: true
   encoder:
     learned_pos: true
-  dropout: 0.2
-  label_smoothing: 0.1
   length_loss_factor: 0.01
 optimizer:
   _name: adam
   adam_betas: (0.9,0.98)
 lr_scheduler:
   _name: inverse_sqrt
-  warmup_updates: 500
+  warmup_updates: 200
   warmup_init_lr: 1e-07
 dataset:
   max_tokens: 8192
-  validate_interval_updates: 20
+  validate_interval_updates: 50
 optimization:
   lr: [0.0005]
   update_freq: [8]
