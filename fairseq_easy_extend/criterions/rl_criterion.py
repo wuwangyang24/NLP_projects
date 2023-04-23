@@ -77,8 +77,11 @@ class RLCriterion(FairseqCriterion):
                 chrf = CHRF()
                 R = torch.tensor([chrf.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
                 R = R.repeat(sent_len, 1).T
-
-            elif self.metric == "COMET":
+            elif self.metric == "BLEU":
+                bleu = BLEU()
+                R = torch.tensor([bleu.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
+                R = R.repeat(sent_len, 1).T
+            else:
                 ter = TER()
                 R = torch.tensor([ter.corpus_score(pred, target).score for pred, target in zip(preds, targets)])
         return R
