@@ -7,7 +7,7 @@ task:
   noise: random_mask
 criterion:
   _name: rl_loss
-  sentence_level_metric: CHRF
+  sentence_level_metric: TER
 model:
   _name: cmlm_transformer_base
   share_decoder_input_output_embed: true
@@ -15,21 +15,23 @@ model:
     learned_pos: true
   encoder:
     learned_pos: true
-  length_loss_factor: 0.1
+  dropout: 0.2
+  label_smoothing: 0.1
+  length_loss_factor: 0.01
 optimizer:
   _name: adam
   adam_betas: (0.9,0.98)
 lr_scheduler:
   _name: inverse_sqrt
-  warmup_updates: 200
+  warmup_updates: 2000
   warmup_init_lr: 1e-07
 dataset:
   max_tokens: 8192
-  validate_interval_updates: 50
+  validate_interval_updates: 1000
 optimization:
   lr: [0.0005]
   update_freq: [8]
-  max_update: 5000
+  max_update: 20000
   stop_min_lr: 1e-09
 checkpoint:
   no_epoch_checkpoints: false
