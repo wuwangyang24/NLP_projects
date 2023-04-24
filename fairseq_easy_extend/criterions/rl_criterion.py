@@ -41,7 +41,7 @@ class RLCriterion(FairseqCriterion):
         
         #softmax outputs
         with torch.no_grad():
-            outputs_prob = F.softmax(outputs/1.5, dim=-1).view(-1, vocab_size)
+            outputs_prob = F.softmax(outputs, dim=-1).view(-1, vocab_size)
         
             #multinomial sampling 
             sample_sent_idx = torch.multinomial(outputs_prob, 1, True).view(batch_size, sent_len)
@@ -56,14 +56,15 @@ class RLCriterion(FairseqCriterion):
         R = self.compute_reward(sample_sent_str, target_sent_str, sent_len)
         R = R.to(outputs.device)
         
+        outputs_logprob = F.log_softmax(outputs, dim=-1)
+        
         #padding mask, do not remove
         if masks is not None:
-            outputs, targets = outputs[masks], targets[masks]
+            outputs_logprob, targets = outputs_logprob[masks], targets[masks]
             sample_sent_idx, R = sample_sent_idx[masks], R[masks]
             
 #         print(outputs.size(), sample_sent_idx.size())
-        
-        outputs_logprob = F.log_softmax(outputs/1.5, dim=-1)
+               
         sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
 
         loss = -sample_logprob*R
