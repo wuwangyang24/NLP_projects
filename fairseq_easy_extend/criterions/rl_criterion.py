@@ -40,10 +40,11 @@ class RLCriterion(FairseqCriterion):
         batch_size, sent_len, vocab_size = outputs.size()[0], outputs.size()[1], outputs.size()[2]
         
         #softmax outputs
-        outputs_prob = F.softmax(outputs/1.5, dim=-1).view(-1, vocab_size)
+        with torch.no_grad():
+            outputs_prob = F.softmax(outputs/1.5, dim=-1).view(-1, vocab_size)
         
-        #multinomial sampling 
-        sample_sent_idx = torch.multinomial(outputs_prob, 1, True).view(batch_size, sent_len)
+            #multinomial sampling 
+            sample_sent_idx = torch.multinomial(outputs_prob, 1, True).view(batch_size, sent_len)
         
         #convert to string sentence
         sample_sent_str = [self.tgt_dict.string(sample, bpe_symbol="@@") for sample in sample_sent_idx]
