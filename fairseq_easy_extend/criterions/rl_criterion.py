@@ -84,10 +84,8 @@ class RLCriterion(FairseqCriterion):
                 ter = TER()
                 R = torch.tensor([ter.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
                 R = 100 - R.repeat(sent_len, 1).T
-            #calculate BERTscore
             else:
-                R = torch.tensor([bert_score.score([sample], [target], lang='en', model_type='bert-base-uncased')[2] for sample,target in zip(sampled_sentences,targets)]) 
-                R = R.repeat(sent_len, 1).T 
+                pass
         return R
 
 
