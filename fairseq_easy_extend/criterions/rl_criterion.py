@@ -46,8 +46,8 @@ class RLCriterion(FairseqCriterion):
         sample_sent_idx = torch.multinomial(outputs_prob, 1, True).view(batch_size, sent_len)
         
         #convert to string sentence
-        sample_sent_str = [self.tgt_dict.string(sample) for sample in sample_sent_idx]
-        target_sent_str = [self.tgt_dict.string(target).replace("<pad>", "").strip() for target in targets]        
+        sample_sent_str = [self.tgt_dict.string(sample, bpe_symbol="@@") for sample in sample_sent_idx]
+        target_sent_str = [self.tgt_dict.string(target, bpe_symbol="@@").replace("<pad>", "").strip() for target in targets]        
         # print(sample_sent_str)
         # print(target_sent_str)
         
