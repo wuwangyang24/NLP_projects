@@ -8,7 +8,8 @@ from fairseq.criterions import FairseqCriterion, register_criterion
 from fairseq.dataclass import FairseqDataclass
 from torch import Tensor
 from sacrebleu.metrics import BLEU, CHRF, TER
-import bert_score
+import nltk
+nltk.download('punkt')
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List
@@ -80,10 +81,11 @@ class RLCriterion(FairseqCriterion):
                 R = torch.tensor([chrf.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
                 R = R.repeat(sent_len, 1).T
             #calculate Ter score
-            elif self.metric == "TER":
-                ter = TER()
-                R = torch.tensor([ter.corpus_score([sample], [[target]]).score for sample,target in zip(sampled_sentences,targets)])
-                R = 100 - R.repeat(sent_len, 1).T
+            elif self.metric == "BLEU":
+                tokenizer = nltk.word_tokenize
+                scorer = nltk.translate.bleu_score.sentence_bleu
+                R = torch.tensor([scorer([tokenizer(target)], tokenizer(sample)) for sample,target in zip(sampled_sentences,targets)])
+                R = R.repeat(sent_len, 1).T
             else:
                 pass
         return R
