@@ -58,7 +58,7 @@ class RLCriterion(FairseqCriterion):
         
         #padding mask, do not remove
         if masks is not None:
-            outputs_logprob, targets = outputs_logprob[masks], targets[masks]
+            outputs, targets = outputs[masks], targets[masks]
             sample_sent_idx, R = sample_sent_idx[masks], R[masks]
             
 #         print(outputs.size(), sample_sent_idx.size())
