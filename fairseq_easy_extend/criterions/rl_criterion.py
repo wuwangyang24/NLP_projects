@@ -57,17 +57,17 @@ class RLCriterion(FairseqCriterion):
         R = self.compute_reward(sample_sent_str, target_sent_str, sent_len)
         R = R.to(outputs.device)
         
-#         outputs_logprob = F.log_softmax(outputs, dim=-1)
+        outputs_logprob = F.log_softmax(outputs, dim=-1)
         
         #padding mask, do not remove
         if masks is not None:
-            outputs, targets = outputs[masks], targets[masks]
-#             outputs_logprob, targets = outputs_logprob[masks], targets[masks]
+#            outputs, targets = outputs[masks], targets[masks]
+            outputs_logprob, targets = outputs_logprob[masks], targets[masks]
             sample_sent_idx, R = sample_sent_idx[masks], R[masks]
             
 #         print(outputs.size(), sample_sent_idx.size())
 
-        outputs_logprob = F.log_softmax(outputs, dim=-1)       
+#        outputs_logprob = F.log_softmax(outputs, dim=-1)       
         sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
 
         loss = -sample_logprob*R
