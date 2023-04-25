@@ -8,6 +8,7 @@ from fairseq.criterions import FairseqCriterion, register_criterion
 from fairseq.dataclass import FairseqDataclass
 from torch import Tensor
 from sacrebleu.metrics import BLEU, CHRF, TER
+from nltk.translate.bleu_score import SmoothingFunction
 import nltk
 nltk.download('punkt')
 
@@ -85,7 +86,7 @@ class RLCriterion(FairseqCriterion):
             elif self.metric == "BLEU":
                 tokenizer = nltk.word_tokenize
                 scorer = nltk.translate.bleu_score.sentence_bleu
-                R = torch.tensor([scorer([tokenizer(target)], tokenizer(sample)) for sample,target in zip(sampled_sentences,targets)])
+                R = torch.tensor([scorer([tokenizer(target)], tokenizer(sample), smoothing_function=SmoothingFunction().method1) for sample,target in zip(sampled_sentences,targets)])
                 R = R.repeat(sent_len, 1).T
             else:
                 pass
