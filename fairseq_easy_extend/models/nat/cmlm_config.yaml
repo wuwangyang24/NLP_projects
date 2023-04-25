@@ -7,7 +7,7 @@ task:
   noise: random_mask
 criterion:
   _name: rl_loss
-  sentence_level_metric: TER
+  sentence_level_metric: BLEU
 model:
   _name: cmlm_transformer_base
   share_decoder_input_output_embed: true
