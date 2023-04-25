@@ -7,7 +7,7 @@ task:
   noise: random_mask
 criterion:
   _name: rl_loss
-  sentence_level_metric: BLEU
+  sentence_level_metric: CHRF
 model:
   _name: cmlm_transformer_base
   share_decoder_input_output_embed: true
@@ -37,5 +37,5 @@ checkpoint:
   no_epoch_checkpoints: false
 common:
   log_format: simple
-  log_interval: 10
+  log_interval: 1
   tensorboard_logdir: /content/drive/MyDrive/NLP_project_1
