@@ -40,35 +40,36 @@ class RLCriterion(FairseqCriterion):
         """
         batch_size, sent_len, vocab_size = outputs.size()[0], outputs.size()[1], outputs.size()[2]
         
-        #softmax outputs
+        ## Apply softmax on outputs and sample one sentence from output space
         with torch.no_grad():
+            #softmax outputs
             outputs_prob = F.softmax(outputs, dim=-1).view(-1, vocab_size)
-        
-            #multinomial sampling 
+            #multinomial sampling and reshape to batch_size*sent_len
             sample_sent_idx = torch.multinomial(outputs_prob, 1, True).view(batch_size, sent_len)
         
-        #convert to string sentence
+        ## Convert sentence ids to sentence string
+        ## Remove bpe and padding tokens
         sample_sent_str = [self.tgt_dict.string(sample, bpe_symbol="@@") for sample in sample_sent_idx]
         target_sent_str = [self.tgt_dict.string(target, bpe_symbol="@@").replace("<pad>", "").strip() for target in targets]        
         # print(sample_sent_str)
         # print(target_sent_str)
         
-        #compute evaluation score
+        ## Compute evaluation scores
         R = self.compute_reward(sample_sent_str, target_sent_str, sent_len)
         R = R.to(outputs.device)
         
-        outputs_logprob = F.log_softmax(outputs, dim=-1)
-        
-        #padding mask, do not remove
+        ## Compute log-probability of the sampled sentences
+        outputs_logprob = F.log_softmax(outputs, dim=-1) #batch_size*sent_len*vocab_size
+        sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.unsqueeze(2)).squeeze() #batch_size*sent_len
+         
+        #apply padding mask
         if masks is not None:
-#            outputs, targets = outputs[masks], targets[masks]
-            outputs_logprob, targets = outputs_logprob[masks], targets[masks]
-            sample_sent_idx, R = sample_sent_idx[masks], R[masks]
+            sample_logprob = sample_logprob[masks]
+            R = R[masks]
             
 #         print(outputs.size(), sample_sent_idx.size())
-
 #        outputs_logprob = F.log_softmax(outputs, dim=-1)       
-        sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
+#         sample_logprob = torch.gather(outputs_logprob, dim=-1, index=sample_sent_idx.view(-1,1)).squeeze(-1)
 
         loss = -sample_logprob*R
         loss = loss.mean()
