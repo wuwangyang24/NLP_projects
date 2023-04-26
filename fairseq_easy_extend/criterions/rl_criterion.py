@@ -49,8 +49,8 @@ class RLCriterion(FairseqCriterion):
         
         ## Convert sentence ids to sentence string
         ## Remove bpe and padding tokens
-        sample_sent_str = [self.tgt_dict.string(sample, bpe_symbol="@@") for sample in sample_sent_idx]
-        target_sent_str = [self.tgt_dict.string(target, bpe_symbol="@@").replace("<pad>", "").strip() for target in targets]        
+        sample_sent_str = [self.tgt_dict.string(sample, bpe_symbol="@@", extra_symbols_to_ignore={0, 1, 2}) for sample in sample_sent_idx]
+        target_sent_str = [self.tgt_dict.string(target, bpe_symbol="@@", extra_symbols_to_ignore={0, 1, 2}) for target in targets]        
         # print(sample_sent_str)
         # print(target_sent_str)
         
