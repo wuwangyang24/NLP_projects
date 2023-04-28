@@ -12,6 +12,7 @@ from sacrebleu.metrics import BLEU, CHRF, TER
 # import nltk
 # nltk.download('punkt')
 from fairseq.data import encoders
+from argparse import ArgumentError, ArgumentParser, Namespace
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List
