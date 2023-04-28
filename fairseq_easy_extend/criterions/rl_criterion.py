@@ -8,9 +8,10 @@ from fairseq.criterions import FairseqCriterion, register_criterion
 from fairseq.dataclass import FairseqDataclass
 from torch import Tensor
 from sacrebleu.metrics import BLEU, CHRF, TER
-from nltk.translate.bleu_score import SmoothingFunction
-import nltk
-nltk.download('punkt')
+# from nltk.translate.bleu_score import SmoothingFunction
+# import nltk
+# nltk.download('punkt')
+from fairseq.data import encoders
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List
@@ -29,6 +30,7 @@ class RLCriterion(FairseqCriterion):
         self.tgt_dict = task.target_dictionary
         print(f"metric: {self.metric}")
         self.repetition = None
+        self.tokenizer = encoders.build_tokenizer(Namespace(tokenizer='moses'))
 
     def _compute_loss(
         self, outputs, targets, masks=None, label_smoothing=0.0, name="loss", factor=1.0
@@ -51,8 +53,8 @@ class RLCriterion(FairseqCriterion):
         ## Remove bpe and padding tokens
         sample_sent_str = [self.tgt_dict.string(sample, bpe_symbol="@@", extra_symbols_to_ignore={0, 1, 2}) for sample in sample_sent_idx]
         target_sent_str = [self.tgt_dict.string(target, bpe_symbol="@@", extra_symbols_to_ignore={0, 1, 2}) for target in targets]        
-        # print(sample_sent_str)
-        # print(target_sent_str)
+        # print(sample_sent_str[4])
+        # print(self.tokenizer.decode(target_sent_str[4]))
         
         ## Compute evaluation scores
         R = self.compute_reward(sample_sent_str, target_sent_str, sent_len)
